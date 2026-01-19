@@ -815,6 +815,7 @@ function deleteMeal() {
       localStorage.setItem("mealList", JSON.stringify(mealList));
       displayLoggedMeal();
       foodLogNutrition();
+      displayWeeklyMap();
     });
   }
 }
@@ -1310,7 +1311,7 @@ function displayWeeklyMap() {
   let date = new Date().getDate();
   var cartona = ``;
   for (let i = 0; i < daysArr.length; i++) {
-    let todayDate = new Date().getDate() + i;
+    let todayDate = date + i;
     cartona += ` <div class="day-card text-center">
                 <p class="text-xs text-gray-500 mb-1">${daysArr[i]}</p>
                 <p class="text-sm font-medium text-gray-900">${todayDate}</p>
