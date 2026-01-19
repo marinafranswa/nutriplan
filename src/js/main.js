@@ -40,7 +40,6 @@ sidebar.addEventListener("click", (e) => {
   if (button != null) {
     const buttonText = button.querySelector("span").textContent;
 
-
     button.classList.remove("hover:bg-gray-50");
     button.classList.remove("text-gray-600");
     button.classList.add("bg-emerald-50", "text-emerald-700");
@@ -373,11 +372,9 @@ class Meal {
       );
 
       const response = await x.json();
-    
 
       if (response.success == true) {
         recipesDataArr = response.data;
-
       } else {
         throw new Error(`Error fetching questions from API`);
       }
@@ -418,7 +415,6 @@ async function getMealId(mealId) {
 }
 
 async function displayMealDetail(myMeal, recipesDataArr) {
-
   myMeal.calories = recipesDataArr.perServing.calories;
   myMeal.carbs = recipesDataArr.perServing.carbs;
   myMeal.fats = recipesDataArr.perServing.fat;
@@ -709,7 +705,6 @@ let mealList = [];
 
 if (JSON.parse(localStorage.getItem("mealList")).length > 0) {
   mealList = JSON.parse(localStorage.getItem("mealList"));
-
 } else {
   mealList = [];
 }
@@ -725,9 +720,9 @@ function logging(myMeal) {
     carbs: myMeal.carbs,
     fat: myMeal.fats,
     totalCalories: myMeal.totalCalories,
-    date: new Date().toISOString(),
+    date: new Date().getDate(),
   };
-  // console.log(meal);
+  console.log(meal);
 
   mealList.push(meal);
   localStorage.setItem("mealList", JSON.stringify(mealList));
@@ -1294,99 +1289,38 @@ function getProductDetails(response) {
   }
 }
 function showDate() {
-  let today = new Date().getDate()
-  document.getElementById("foodlog-date").innerHTML = ` Jan ${today}`;
+  let today = new Date().toDateString();
+  console.log(today);
+
+  document.getElementById("foodlog-date").innerHTML = `${today}`;
 }
 showDate();
+
 function displayWeeklyMap() {
-  const meals = JSON.parse(localStorage.getItem("mealList")) || [];
-  const today = new Date();
-  const currentDay = today.getDay();
-  const monday = new Date(today);
-  const daysFromMon = currentDay === 0 ? 6 : currentDay - 1;
-  monday.setDate(today.getDate() - daysFromMon);
-
-  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const dayNumbers = [];
-  const calories = [];
-
-  let todayCalories = 0;
-  for (let i = 0; i < meals.length; i++) {
-    todayCalories += meals[i].calories || 0;
+  let totalCalories = 0;
+  let listDate = 0;
+  for (let i = 0; i < mealList.length; i++) {
+    totalCalories += mealList[i].calories;
+    listDate = mealList[i].date;
   }
+  console.log(mealList);
 
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + i);
-    dayNumbers.push(date.getDate());
+  const daysArr = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-    const isToday = date.toDateString() === today.toDateString();
-
-    if (isToday) {
-      calories.push(todayCalories);
-    } else {
-      calories.push(0);
-    }
+  let date = new Date().getDate();
+  var cartona = ``;
+  for (let i = 0; i < daysArr.length; i++) {
+    let todayDate = new Date().getDate() + i;
+    cartona += ` <div class="day-card text-center">
+                <p class="text-xs text-gray-500 mb-1">${daysArr[i]}</p>
+                <p class="text-sm font-medium text-gray-900">${todayDate}</p>
+                <div class="mt-2 text-gray-300">
+                  <p class="text-lg font-bold">${listDate === todayDate ? totalCalories : 0}</p>
+                  <p class="text-xs">kcal</p>
+                </div>
+              </div>`;
   }
-
-  const data = [
-    {
-      x: daysOfWeek,
-      y: calories,
-      type: "scatter",
-      mode: "markers",
-      marker: {
-        size: 10,
-        color: calories.map((cal) => (cal > 0 ? "#059669" : "#d1d5db")),
-      },
-      hovertemplate: "<b>%{x}</b><br>%{y} calories<extra></extra>",
-    },
-  ];
-
-  const layout = {
-    height: 150,
-    margin: { t: 30, r: 40, b: 40, l: 40 },
-    xaxis: {
-      side: "top",
-      tickfont: { size: 14 },
-    },
-    yaxis: {
-      visible: false,
-    },
-    paper_bgcolor: "white",
-    plot_bgcolor: "white",
-    annotations: [],
-  };
-
-  for (let i = 0; i < 7; i++) {
-    layout.annotations.push({
-      x: daysOfWeek[i],
-      y: 0,
-      text: `<b>${dayNumbers[i]}</b>`,
-      showarrow: false,
-      font: { size: 14, color: "#111827" },
-      yshift: 15,
-    });
-
-    layout.annotations.push({
-      x: daysOfWeek[i],
-      y: 0,
-      text: `<b>${calories[i]}</b><br>kcal`,
-      showarrow: false,
-      font: {
-        size: calories[i] > 0 ? 16 : 14,
-        color: calories[i] > 0 ? "#059669" : "#d1d5db",
-      },
-      yshift: -10,
-    });
-  }
-
-  const config = {
-    responsive: true,
-    displayModeBar: false,
-  };
-
-  Plotly.newPlot("weekly-chart", data, layout, config);
+  document.getElementById("weekly-chart").innerHTML = cartona;
 }
 
 displayWeeklyMap();
